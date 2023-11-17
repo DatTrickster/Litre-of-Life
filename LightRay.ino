@@ -53,7 +53,7 @@ void loop() {
 
   // If not in manual mode, control outputs based on luminosity level
   if (!manualMode) {
-    if (luminData < 5) {
+    if (luminData <= 4) {
       output26State = "on";
       output27State = "on";
       digitalWrite(output26, HIGH);
@@ -152,17 +152,22 @@ void sendHeader(WiFiClient client) {
   client.println();
 }
 
-// Send the HTML web page to the client
+
+// Send the HTML web page to the client ------- 
 void sendWebPage(WiFiClient client) {
   client.println("<!DOCTYPE html><html>");
   client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
   client.println("<link rel=\"icon\" href=\"data:,\">");
   client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
   client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
-  client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
-  client.println(".button2 {background-color: #555555;}</style></head>");
+  client.println("text-decoration: none; font-size: 30px; margin: 10px; cursor: pointer; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);}");
+  client.println(".button2 {background-color: #555555; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);}");
+  client.println("h1 {color: #333333;}");
+  client.println("h2 {color: #555555;}");
+  client.println("body {margin-top: 50px;}");
+  client.println("</style></head>");
 
-  client.println("<body><h1>ESP8266 Web Server</h1>");
+  client.println("<body><h1>Litre of Light</h1>");
   client.println("<p>GPIO 26 - State " + output26State + "</p>");
   if (output26State == "off") {
     client.println("<p><a href=\"/26/on\"><button class=\"button\">ON</button></a></p>");
@@ -178,13 +183,25 @@ void sendWebPage(WiFiClient client) {
   }
 
   client.println("<p>Luminosity: " + String(luminData) + "</p>");
-  client.println("<p>Manual Override: <button class=\"button\" onclick=\"toggleManual()\">Toggle</button></p>");
+
+  // Heading for Manual Override
+  client.println("<h2>Manual Override</h2>");
+
+  // Manual Override Button
+  client.print("<p><button id=\"manualButton\" class=\"button\" onclick=\"toggleManual()\">");
+  client.print(manualMode ? "ON" : "OFF");
+  client.println("</button></p>");
+
+  // functionality of the OVERRIDE BUTTON ENJOY :) 
   client.println("<script>");
   client.println("function toggleManual() {");
   client.println("  var xhttp = new XMLHttpRequest();");
   client.println("  xhttp.open('GET', '/manual', true);");
   client.println("  xhttp.send();");
+  client.println("  document.getElementById('manualButton').innerHTML = xhttp.responseText;");
+  client.println("  setTimeout(function(){ location.reload(true); }, 1000);");  // Refresh the page after 1 second
   client.println("}</script>");
 
   client.println("</body></html>");
 }
+
