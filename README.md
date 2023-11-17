@@ -8,14 +8,9 @@ Two GPIO pins (D4 and D1) are assigned to control the state of the outputs. Thes
 
 # New stuff added in V2 code
 
- Markup : * Bullet list
-              * Nested bullet
-                  * Sub-nested bullet etc
-          * Bullet list item 2
-
--added new Ldr function and set up master override button to switch manual mode on/off
--Using pin A0 now for Ldr 
--UI improvements
+###-added new Ldr function and set up master override button to switch manual mode on/off
+###-Using pin A0 now for Ldr 
+###-UI improvements
 
 # ESP8266 Web Server Documentation
 # Overview
