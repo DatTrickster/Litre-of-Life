@@ -7,9 +7,9 @@ The code sets up a web server on port 80 using the WiFiServer server (80). The s
 Two GPIO pins (D4 and D1) are assigned to control the state of the outputs. These GPIO pins are set as outputs using pinMode (output26, OUTPUT) and pinMode (output27, OUTPUT).
 
 # New stuff added in V2 code
-added new Ldr function and set up master override button to switch manual mode on/off
-Using pin A0 now for Ldr 
-UI improvements
+*added new Ldr function and set up master override button to switch manual mode on/off
+*Using pin A0 now for Ldr 
+*UI improvements
 
 # ESP8266 Web Server Documentation
 # Overview
