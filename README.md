@@ -1,4 +1,4 @@
-# Litre-of-Life V2
+# Litre-of-Life V2 CODE
 
 The SSID and password for the access point (AP) are set as global variables (ssid and password). The AP is created using WiFi.softAP (ssid, password), allowing devices to connect to the ESP8266 as a WiFi hotspot. Web Server Setup:
 
