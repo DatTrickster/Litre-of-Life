@@ -70,10 +70,11 @@ void loop() {
               digitalWrite(SwitchD4, LOW);
             }
 
-            // Display the HTML web page for SwitchD4
+            // Display the HTML web page for SwitchD4 with styling
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
             client.println("<link rel=\"icon\" href=\"data:,\">");
+            // Styling for buttons
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
             client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
             client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
@@ -102,3 +103,4 @@ void loop() {
     Serial.println("");
   }
 }
+
