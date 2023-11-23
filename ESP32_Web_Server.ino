@@ -1,106 +1,115 @@
 #include <ESP8266WiFi.h>
 
-// WiFi credentials
-const char *ssid = "LightRAy";
-const char *password = "123456789";
+// Replace with your network credentials
+const char* ssid = "Pain_In_my ASS";
+const char* password = "123456789";
 
-// Create a WiFi server on port 80
+// Set web server port number to 80
 WiFiServer server(80);
 
-// Variables to store the state of SwitchD4
-String SwitchD4State = "off";
+// Variable to store the HTTP request
+String header;
 
-// Define pin assignment for SwitchD4 (GPIO 26)
-const int SwitchD4 = D4;
+// Auxiliar variables to store the current output state
+String D4OutputState = "off";
+
+// Assign output variables to GPIO pins
+const int D4Output = D1;
 
 void setup() {
-  // Initialize serial communication
   Serial.begin(115200);
+  // Initialize the output variables as outputs
+  pinMode(D4Output, OUTPUT);
+  // Set output to LOW
+  digitalWrite(D4Output, LOW);
 
-  // Set pin mode for SwitchD4
-  pinMode(SwitchD4, OUTPUT);
-
-  // Set initial state for SwitchD4
-  digitalWrite(SwitchD4, LOW);
-
-  // Create an Access Point with specified credentials
-  Serial.println("Setting up Access Point...");
+  // Connect to Wi-Fi network with SSID and password
+  Serial1.print("Setting up Access Point...");
+  // Remove the password parameter if you want the Access Point to be open
   WiFi.softAP(ssid, password);
 
-  // Get and print the Access Point IP address
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
-  // Start the server
   server.begin();
 }
 
 void loop() {
-  // Check for incoming client requests for SwitchD4
-  WiFiClient client = server.available();
+  WiFiClient client = server.available();   // Listen for incoming clients
 
-  if (client) {
-    Serial.println("New Client.");
-    String currentLine = "";
-
-    // Read and process the client request for SwitchD4
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        currentLine += c;
-        if (c == '\n') {
-          // If the current line is blank, it's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 1) {
-            // HTTP headers
+  if (client) {                             // If a new client connects,
+    Serial.println("New Client.");          // print a message out on the serial port
+    String currentLine = "";                // make a String to hold incoming data from the client
+    while (client.connected()) {            // loop while the client's connected
+      if (client.available()) {             // if there's bytes to read from the client,
+        char c = client.read();             // read a byte, then
+        Serial.write(c);                    // print it out to the serial monitor
+        header += c;
+        if (c == '\n') {                    // if the byte is a newline character
+          // if the current line is blank, you got two newline characters in a row.
+          // that's the end of the client HTTP request, so send a response:
+          if (currentLine.length() == 0) {
+            // HTTP headers always start with a response code (e.g., HTTP/1.1 200 OK)
+            // and a content-type so the client knows what's coming, then a blank line:
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println("Connection: close");
             client.println();
 
-            // Process the request for SwitchD4
-            if (currentLine.indexOf("GET /SwitchD4/on") >= 0) {
-              Serial.println("SwitchD4 on");
-              SwitchD4State = "on";
-              digitalWrite(SwitchD4, HIGH);
-            } else if (currentLine.indexOf("GET /SwitchD4/off") >= 0) {
-              Serial.println("SwitchD4 off");
-              SwitchD4State = "off";
-              digitalWrite(SwitchD4, LOW);
+            // turns the GPIO on and off
+            if (header.indexOf("GET /D4/on") >= 0) {
+              Serial.println("D4 Output on");
+              D4OutputState = "on";
+              digitalWrite(D4Output, HIGH);
+            } else if (header.indexOf("GET /D4/off") >= 0) {
+              Serial.println("D4 Output off");
+              D4OutputState = "off";
+              digitalWrite(D4Output, LOW);
             }
 
-            // Display the HTML web page for SwitchD4 with styling
+            // Display the HTML web page
             client.println("<!DOCTYPE html><html>");
             client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
             client.println("<link rel=\"icon\" href=\"data:,\">");
-            // Styling for buttons
+            // CSS to style the on/off buttons with rounded corners and drop shadow
             client.println("<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}");
             client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
-            client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}");
+            client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);}");
             client.println(".button2 {background-color: #555555;}</style></head>");
-            client.println("<body><h1>ESP8266 Web Server</h1>");
-            client.println("<p>SwitchD4 - State " + SwitchD4State + "</p>");
-            if (SwitchD4State == "off") {
-              client.println("<p><a href=\"/SwitchD4/on\"><button class=\"button\">ON</button></a></p>");
+
+            // Web Page Heading
+            client.println("<body><h1>Single Switch Web Server</h1>");
+
+            // Display current state and ON/OFF buttons for D4 Output
+            client.println("<p>D4 Output - State " + D4OutputState + "</p>");
+            // If the D4OutputState is off, it displays the ON button       
+            if (D4OutputState == "off") {
+              client.println("<p><a href=\"/D4/on\"><button class=\"button\">ON</button></a></p>");
             } else {
-              client.println("<p><a href=\"/SwitchD4/off\"><button class=\"button button2\">OFF</button></a></p>");
+              client.println("<p><a href=\"/D4/off\"><button class=\"button button2\">OFF</button></a></p>");
             }
             client.println("</body></html>");
 
+            // The HTTP response ends with another blank line
+            client.println();
             // Break out of the while loop
             break;
-          } else { // If not a blank line, clear currentLine
+          } else { // if you got a newline, then clear currentLine
             currentLine = "";
           }
+        } else if (c != '\r') {  // if you got anything else but a carriage return character,
+          currentLine += c;      // add it to the end of the currentLine
         }
       }
     }
-
+    // Clear the header variable
+    header = "";
     // Close the connection
     client.stop();
     Serial.println("Client disconnected.");
     Serial.println("");
   }
 }
+
 
